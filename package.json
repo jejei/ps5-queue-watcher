@@ -1,0 +1,20 @@
+{
+  "name": "soup-games",
+  "version": "1.0.0",
+  "description": "Soup of games",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^11.0.3"
+  },
+  "dependencies": {
+    "electron-fetch": "^1.7.2",
+    "node-fetch": "^2.6.1",
+    "node-notifier": "^8.0.0"
+  }
+}
