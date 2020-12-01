@@ -1,15 +1,12 @@
 const { app, BrowserWindow, session } = require('electron');
-const notifier = require('node-notifier');
 const fetch = require('electron-fetch').default;
+const sleep = require('./lib/sleep');
+const notify = require('./lib/notify');
 const cons = require('./constants');
+const config = require('./config.json');
+const logger = require('pino')({ prettyPrint: config.prettyPrint });
 
-async function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function notify(title, message) {
-	return notifier.notify({title: title, message: message, sound: true});
-}
+logger.level = config.logLevel;
 
 let ses;
 
@@ -58,12 +55,12 @@ async function checkStatus(queueID) {
 		
 		if (redir) return {status: cons.errors.CAPTCHA, redir: redir};
 		if (msg) {
-			console.log(msg);
+			logger.trace(msg);
 			let text = msg.text.toLowerCase();
 			if (!text.includes(cons.oosMsg)) return {status: cons.errors.MESSAGE, msg: txt};
 		}
 		if (ticket) {
-			console.log(ticket);
+			logger.trace(ticket);
 			if (ticket.whichIsIn != "less than a minute" || ticket.usersInQueue > 0) return {status: cons.errors.QUEUE};
 		}
 		return {status: cons.errors.OK};
@@ -83,10 +80,10 @@ async function doCaptcha(redir) {
 				nodeIntegration: false,
 			}
 		});
-		win.loadURL(cons.captchaPrefix + redir);
 		win.on('closed', _ => {
 			resolve();
 		});
+		win.loadURL(cons.captchaPrefix + redir);
 	});
 }
 
@@ -96,7 +93,7 @@ async function queue() {
 	while (!queueID) {
 		queueID = await generateID();
 		if (!queueID) {
-			console.log(`failed to generate queue ID, retrying in ${cons.refreshTime} seconds`);
+			logger.debug(`failed to generate queue ID, retrying in ${cons.refreshTime} seconds`);
 			await sleep(cons.refreshTime * 1000);
 		};
 	}
@@ -108,39 +105,39 @@ async function queue() {
 		case cons.errors.OK:
 			break;
 		case cons.errors.CAPTCHA:
-			console.log("need to do captcha!");
+			logger.info("need to do captcha!");
 			notify("Captcha required", "Go do the captcha!");
 			await doCaptcha(err.redir);
-			console.log("captcha window closed");
+			logger.info("captcha window closed");
 			break;
 		case cons.errors.MESSAGE:
-			console.log("message found!");
+			logger.info("message found!");
 			notify("Queue message found!", "Go to the site!")
 			return;
 		case cons.errors.QUEUE:
-			console.log("updated queue info found!");
+			logger.info("updated queue info found!");
 			notify("Queue info changed!", "Go to the site!");
 			return;
 		default:
-			console.log("encountered error, restarting session");
-			console.log(err);
+			logger.info("encountered error, restarting session");
+			logger.error(err);
 			await ses.clearStorageData();
 			queueID = "";
 			while (!queueID) {
 				queueID = await generateID();
 				if (!queueID) {
-					console.log(`failed to generate queue ID, retrying in ${cons.refreshTime} seconds`);
+					logger.debug(`failed to generate queue ID, retrying in ${cons.refreshTime} seconds`);
 					await sleep(cons.refreshTime * 1000)
 				};
 			}
-			console.log("new queue id generated");
+			logger.info("new queue id generated");
 		}
 		await sleep(cons.queueRefresh * 1000);
 	}
 }
 
 app.on('window-all-closed', () => {
-  //console.log("dont stop");
+  //logger.debug("dont stop");
 })
 
 app.whenReady().then(queue).then(app.quit);
