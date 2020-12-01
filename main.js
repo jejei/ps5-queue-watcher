@@ -22,6 +22,7 @@ const baseRespEnd = 1605743184831;
 const queueIDHdr = "x-amzn-requestid";
 const baseID = "00000000-0000-0000-0000-000000000000";
 const oosMsg = "out of stock";
+const captchaPrefix = "https://direct-queue.playstation.com";
 
 const errors = {
 	OK: 0,
@@ -92,23 +93,23 @@ async function checkStatus(queueID) {
 		let msg = json.message;
 		let ticket = json.ticket;
 		
-		if (redir) return errors.CAPTCHA;
+		if (redir) return {status: errors.CAPTCHA, redir: redir};
 		if (msg) {
 			console.log(msg);
 			let text = msg.text.toLowerCase();
-			if (!text.includes(oosMsg)) return errors.MESSAGE;
+			if (!text.includes(oosMsg)) return {status: errors.MESSAGE, msg: txt};
 		}
 		if (ticket) {
 			console.log(ticket);
-			if (ticket.whichIsIn != "less than a minute" || ticket.usersInQueue > 0) return errors.QUEUE;
+			if (ticket.whichIsIn != "less than a minute" || ticket.usersInQueue > 0) return {status: errors.QUEUE};
 		}
-		return errors.OK;
+		return {status: errors.OK};
 	} catch (e) {
 		return e;
 	}
 }
 
-async function doCaptcha() {
+async function doCaptcha(redir) {
 	return new Promise(resolve => {
 		const win = new BrowserWindow({
 			width: 800,
@@ -119,7 +120,7 @@ async function doCaptcha() {
 				nodeIntegration: false,
 			}
 		});
-		win.loadURL(url);
+		win.loadURL(captchaPrefix + redir);
 		win.on('closed', _ => {
 			resolve();
 		});
@@ -134,13 +135,14 @@ async function createWindow() {
 		let err;
 		while (true) {
 			err = await checkStatus(queueID);
-			switch (err) {
+			switch (err.status) {
 			case errors.OK:
 				break;
 			case errors.CAPTCHA:
 				console.log("need to do captcha!");
 				notify("Captcha required", "Go do the captcha!");
-				await doCaptcha();
+				console.log(err.redir);
+				await doCaptcha(err.redir);
 				console.log("captcha window closed");
 				break;
 			case errors.MESSAGE:
@@ -152,7 +154,7 @@ async function createWindow() {
 				notify("Queue info changed!", "Go to the site!");
 				return;
 			default:
-				console.log(err);
+				console.log(err.status);
 			}
 			await sleep(queueRefresh * 1000);
 		}
