@@ -21,6 +21,7 @@ const baseRespStart = 1605743184732;
 const baseRespEnd = 1605743184831;
 const queueIDHdr = "x-amzn-requestid";
 const baseID = "00000000-0000-0000-0000-000000000000";
+const oosMsg = "out of stock";
 
 const errors = {
 	OK: 0,
@@ -31,9 +32,6 @@ const errors = {
 }
 
 let ses;
-
-let savedMessage;
-let captcha = false;
 
 let idBodyTemp = [
     {"method":"GET","requestType":"PAGE","pageUrl":"https://direct-queue.playstation.com/",
@@ -90,10 +88,17 @@ async function checkStatus(queueID) {
 	if (!res.ok) return await res.text();
 	try {
 		let json = await res.json();
-		if (json.redirectUrl) return errors.CAPTCHA;
-		else if (json.message) return errors.MESSAGE;
-		else if (json.ticket) {
-			ticket = json.ticket;
+		let redir = json.redirectUrl;
+		let msg = json.message;
+		let ticket = json.ticket;
+		
+		if (redir) return errors.CAPTCHA;
+		if (msg) {
+			console.log(msg);
+			let text = msg.text.toLowerCase();
+			if (!text.includes(oosMsg)) return errors.MESSAGE;
+		}
+		if (ticket) {
 			console.log(ticket);
 			if (ticket.whichIsIn != "less than a minute" || ticket.usersInQueue > 0) return errors.QUEUE;
 		}
