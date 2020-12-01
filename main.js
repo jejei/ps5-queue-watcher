@@ -1,86 +1,49 @@
 const { app, BrowserWindow, session } = require('electron');
 const notifier = require('node-notifier');
 const fetch = require('electron-fetch').default;
+const cons = require('./constants');
 
 async function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function notify(title, message) {
-	notifier.notify({title: title, message: message, sound: true});
-}
-
-const idURL = "https://us-west-2-perf-api.queue-it.net/perf/timings";
-const baseStatusURL = "https://direct-queue.playstation.com/spa-api/queue/sonyied/psdirectprodku1/00000000-0000-0000-0000-000000000000/status"
-const url = "http://direct.playstation.com/";
-const waitTime = 10; // seconds
-const queueRefresh = 2; // seconds
-const refreshTime = 2; // seconds to refresh id if expired
-const baseReqStart = 1605743184552;
-const baseRespStart = 1605743184732;
-const baseRespEnd = 1605743184831;
-const queueIDHdr = "x-amzn-requestid";
-const baseID = "00000000-0000-0000-0000-000000000000";
-const oosMsg = "out of stock";
-const captchaPrefix = "https://direct-queue.playstation.com";
-
-const errors = {
-	OK: 0,
-	CAPTCHA: 1,
-	MESSAGE: 2,
-	QUEUE: 3,
-	ERR: 4
+	return notifier.notify({title: title, message: message, sound: true});
 }
 
 let ses;
 
-let idBodyTemp = [
-    {"method":"GET","requestType":"PAGE","pageUrl":"https://direct-queue.playstation.com/",
-     "userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36",
-     "requestStart":1605743184552,"responseStart":1605743184732,"responseEnd":1605743184831,"customerId":"sonyied","tags":
-     [
-         {"key":"eventid","value":"psdirectprodku1"},{"key":"queueid","value":"00000000-0000-0000-0000-000000000000"},
-         {"key":"queueit","value":"queue"}
-     ]
-    }
-];
-let statusBody = {
-    "targetUrl":"https://direct.playstation.com/en-us","customUrlParams":"",
-    "layoutVersion":162173827357,"layoutName":"SafetyNet - v20200622",
-    "isClientRedayToRedirect":true,"isBeforeOrIdle":false
-};
-
 async function generateID() {
 	// calculate scaling values
 	let timestamp = new Date().getTime();
-	let requestLength = baseRespEnd - baseReqStart;
-	let latency = baseRespStart - baseReqStart;
-	let processTime = baseRespEnd - baseRespStart;
+	let requestLength = cons.baseRespEnd - cons.baseReqStart;
+	let latency = cons.baseRespStart - cons.baseReqStart;
+	let processTime = cons.baseRespEnd - cons.baseRespStart;
 	
 	// generate simulated timestamp info
 	let idBody = [{
-		...idBodyTemp[0], 
+		...cons.idBodyTemp[0], 
 		requestStart: (timestamp - requestLength), 
 		responseStart: (timestamp - requestLength) + latency,
 		responseEnd: ((timestamp - requestLength) + latency) + processTime
 	}]
 	
-	let res = await fetch(idURL, {
+	let res = await fetch(cons.idURL, {
 		method: "post",
 		body:	JSON.stringify(idBody),
 		session: ses,
 		useSessionCookies: true,
 	});
 	
-	if (res.ok) return res.headers.get(queueIDHdr);
+	if (res.ok) return res.headers.get(cons.queueIDHdr);
 	else return 0;
 }
 
 async function checkStatus(queueID) {
-	let statusURL = baseStatusURL.replace(baseID, queueID);
+	let statusURL = cons.baseStatusURL.replace(cons.baseID, queueID);
 	let res = await fetch(statusURL, {
 		method: "post",
-		body:	JSON.stringify(statusBody),
+		body:	JSON.stringify(cons.statusBody),
 		headers: { 'Content-Type': 'application/json' },
 		session: ses,
 		useSessionCookies: true,
@@ -93,17 +56,17 @@ async function checkStatus(queueID) {
 		let msg = json.message;
 		let ticket = json.ticket;
 		
-		if (redir) return {status: errors.CAPTCHA, redir: redir};
+		if (redir) return {status: cons.errors.CAPTCHA, redir: redir};
 		if (msg) {
 			console.log(msg);
 			let text = msg.text.toLowerCase();
-			if (!text.includes(oosMsg)) return {status: errors.MESSAGE, msg: txt};
+			if (!text.includes(cons.oosMsg)) return {status: cons.errors.MESSAGE, msg: txt};
 		}
 		if (ticket) {
 			console.log(ticket);
-			if (ticket.whichIsIn != "less than a minute" || ticket.usersInQueue > 0) return {status: errors.QUEUE};
+			if (ticket.whichIsIn != "less than a minute" || ticket.usersInQueue > 0) return {status: cons.errors.QUEUE};
 		}
-		return {status: errors.OK};
+		return {status: cons.errors.OK};
 	} catch (e) {
 		return e;
 	}
@@ -120,44 +83,59 @@ async function doCaptcha(redir) {
 				nodeIntegration: false,
 			}
 		});
-		win.loadURL(captchaPrefix + redir);
+		win.loadURL(cons.captchaPrefix + redir);
 		win.on('closed', _ => {
 			resolve();
 		});
 	});
 }
 
-async function createWindow() {
+async function queue() {
 	ses = session.fromPartition('persist:playstation');
-
-	let queueID = await generateID();
-	if (queueID) {
-		let err;
-		while (true) {
-			err = await checkStatus(queueID);
-			switch (err.status) {
-			case errors.OK:
-				break;
-			case errors.CAPTCHA:
-				console.log("need to do captcha!");
-				notify("Captcha required", "Go do the captcha!");
-				console.log(err.redir);
-				await doCaptcha(err.redir);
-				console.log("captcha window closed");
-				break;
-			case errors.MESSAGE:
-				console.log("message found!");
-				notify("Queue message found!", "Go to the site!")
-				return;
-			case errors.QUEUE:
-				console.log("updated queue info found!");
-				notify("Queue info changed!", "Go to the site!");
-				return;
-			default:
-				console.log(err.status);
+	let queueID = "";
+	while (!queueID) {
+		queueID = await generateID();
+		if (!queueID) {
+			console.log(`failed to generate queue ID, retrying in ${cons.refreshTime} seconds`);
+			await sleep(cons.refreshTime * 1000);
+		};
+	}
+	
+	let err;
+	while (true) {
+		err = await checkStatus(queueID);
+		switch (err.status) {
+		case cons.errors.OK:
+			break;
+		case cons.errors.CAPTCHA:
+			console.log("need to do captcha!");
+			notify("Captcha required", "Go do the captcha!");
+			await doCaptcha(err.redir);
+			console.log("captcha window closed");
+			break;
+		case cons.errors.MESSAGE:
+			console.log("message found!");
+			notify("Queue message found!", "Go to the site!")
+			return;
+		case cons.errors.QUEUE:
+			console.log("updated queue info found!");
+			notify("Queue info changed!", "Go to the site!");
+			return;
+		default:
+			console.log("encountered error, restarting session");
+			console.log(err);
+			await ses.clearStorageData();
+			queueID = "";
+			while (!queueID) {
+				queueID = await generateID();
+				if (!queueID) {
+					console.log(`failed to generate queue ID, retrying in ${cons.refreshTime} seconds`);
+					await sleep(cons.refreshTime * 1000)
+				};
 			}
-			await sleep(queueRefresh * 1000);
+			console.log("new queue id generated");
 		}
+		await sleep(cons.queueRefresh * 1000);
 	}
 }
 
@@ -165,4 +143,4 @@ app.on('window-all-closed', () => {
   //console.log("dont stop");
 })
 
-app.whenReady().then(createWindow);
+app.whenReady().then(queue).then(app.quit);

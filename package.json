@@ -9,12 +9,9 @@
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "electron": "^11.0.3"
-  },
   "dependencies": {
+    "electron": "^11.0.3",
     "electron-fetch": "^1.7.2",
-    "node-fetch": "^2.6.1",
     "node-notifier": "^8.0.0"
   }
 }
