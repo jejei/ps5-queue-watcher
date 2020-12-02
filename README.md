@@ -25,3 +25,7 @@ Shortly after starting the program, you will likely be prompted via a notificati
 
 ## Configuration
 Logging settings can be changed via the config.json file. [pino](https://github.com/pinojs/pino) is used for logging. By default, the log level is trace, i.e. all log messages are output, and prettyPrint is enabled. See pino's documentation for more info.
+
+## Notes
+* Does not work outside of US. As far as I know, there are queues for other countries, however this program does not consider them.
+* Needs better error handling. As is, I have not encountered many errors, and have failed to replicate the few I have.
