@@ -1,7 +1,7 @@
 # PS Direct Queue Watcher
-A simple human-assisted program that monitors Playstation Direct's queue for updates running on electron. It is ***not*** a bot that will automatically purchase anything for you, nor will it fill out captcha for you.
+A simple program that monitors Playstation Direct's queue for updates running on electron. It is ***not*** a bot that will automatically purchase anything for you, nor will it fill out captcha for you; rather, it assumes you are actively using your computer.
 
-Obtaining a PS5 has been a hassle, with Sony's own Playstation Direct being the most reliable way of obtaining one. However, even that isn't without its own issues, as Sony's website puts up a queue at times that are unknown until the queue is already up. Coupled with that, manually refreshing itself won't work as intended, as the website's cookies may prevent you from entering the queue on time. This was made specifically to make it easier, alerting you immediately when a new queue begins.
+Obtaining a PS5 has been a hassle, with Sony's own Playstation Direct being the most reliable way of obtaining one. However, even that isn't without its own issues, as Sony's website puts up a queue at times that are unknown until the queue is already up. Coupled with that, manually refreshing itself won't work as intended, as the website's cookies may prevent you from entering the queue on time. This was made specifically to make the process easier, alerting you immediately when a new queue begins.
 
 ## Prerequisites
 * [Git](https://git-scm.com/downloads)
