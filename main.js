@@ -57,7 +57,7 @@ async function checkStatus(queueID) {
 		if (msg) {
 			logger.trace(msg);
 			let text = msg.text.toLowerCase();
-			if (!text.includes(cons.oosMsg)) return {status: cons.errors.MESSAGE, msg: txt};
+			if (!text.includes(cons.oosMsg)) return {status: cons.errors.MESSAGE, msg: text};
 		}
 		if (ticket) {
 			logger.trace(ticket);
@@ -113,11 +113,11 @@ async function queue() {
 		case cons.errors.MESSAGE:
 			logger.info("message found!");
 			notify("Queue message found!", "Go to the site!")
-			return;
+			break;
 		case cons.errors.QUEUE:
 			logger.info("updated queue info found!");
 			notify("Queue info changed!", "Go to the site!");
-			return;
+			break;
 		default:
 			logger.info("encountered error, restarting session");
 			logger.error(err);
