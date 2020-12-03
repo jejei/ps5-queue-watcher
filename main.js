@@ -4,9 +4,7 @@ const sleep = require('./lib/sleep');
 const notify = require('./lib/notify');
 const cons = require('./constants');
 const config = require('./config.json');
-const logger = require('pino')({ prettyPrint: config.prettyPrint });
-
-logger.level = config.logLevel;
+const logger = require('pino')({ level: config.logLevel, prettyPrint: config.prettyPrint });
 
 let ses;
 
