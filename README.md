@@ -40,7 +40,7 @@ Logging settings can be changed via the config.json file. [pino](https://github.
 * Have your payment info on record if possible. That being said, saving payment info on your account is more problematic than saving your address, as it seems to require purchasing something via Playstation Direct.
 
 ## Notes
-* Has only been tested on Windows.
+* Has only been tested on Windows 10.
 * Does not work outside of US. As far as I know, there are queues for other countries, however this program does not consider them.
 * Needs better error handling. As is, I have not encountered many errors, and have failed to replicate the few I have.
 * No unique way to identify notifications outside of reading them, perhaps add some unique sounds and images.
