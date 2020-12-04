@@ -37,7 +37,7 @@ Logging settings can be changed via the config.json file. [pino](https://github.
 ## Tips
 * Sign-in to your Playstation account on your browser before it is your turn in the queue. To do this, go on Playstation's main website and login. Once you pass the queue, you can then just click the "Sign-in" button to automatically be signed in on the shop's website.
 * Have your address on record in advance. This can be done by going to "My Account" on PS Direct's website when a queue isn't active.
-* Have your payment info on record if possible. This is more problematic than your address, as it seems to require purchasing something via Playstation Direct.
+* Have your payment info on record if possible. That being said, saving payment info on your account is more problematic than saving your address, as it seems to require purchasing something via Playstation Direct.
 
 ## Notes
 * Has only been tested on Windows.
