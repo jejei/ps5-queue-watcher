@@ -1,14 +1,14 @@
 {
-  "name": "soup-games",
+  "name": "ps-direct-queue-watcher",
   "version": "1.0.0",
-  "description": "Soup of games",
+  "description": "PS Direct queue monitor",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Jakob",
+  "license": "MIT",
   "dependencies": {
     "electron": "^11.0.3",
     "electron-fetch": "^1.7.2",
