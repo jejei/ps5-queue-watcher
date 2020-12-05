@@ -9,7 +9,7 @@ Obtaining a PS5 has been a hassle, with Sony's own Playstation Direct being the 
 
 ## Installation
 1. Clone the repo using the following command in a bash-like terminal (Git Bash, bundled with Git, works well):\
-`git clone https://github.com/jejei/ps-direct-queue-watcher.git`
+`git clone https://github.com/jejei/ps5-queue-watcher.git`
 
 2. Navigate into the cloned repo's folder:\
 `cd ps-direct-queue-watcher`
