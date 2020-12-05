@@ -1,7 +1,7 @@
 {
-  "name": "ps-direct-queue-watcher",
+  "name": "ps5-queue-watcher",
   "version": "1.0.0",
-  "description": "PS Direct queue monitor",
+  "description": "PS Direct queue monitor for PS5",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
