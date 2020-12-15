@@ -35,9 +35,13 @@ After receiving a notification like this, you should go to the website on your o
 Logging settings can be changed via the config.json file. [pino](https://github.com/pinojs/pino) is used for logging. By default, the log level is trace, i.e. all log messages are output, and prettyPrint is enabled. See pino's documentation for more info.
 
 ## Tips
+* Do **not** access the website on your browser until the queue is up. If you do, you will most likely be blocked from the queue until a cookie expires. If you accidentally do this, you can open a new session in incognito, but you'll have to remember to sign-in again via Playstation's main website while the queue is up.
 * Sign-in to your Playstation account on your browser before it is your turn in the queue. To do this, go on Playstation's main website and login. Once you pass the queue, you can then just click the "Sign-in" button to automatically be signed in on the shop's website.
 * Have your address on record in advance. This can be done by going to "My Account" on PS Direct's website when a queue isn't active.
 * Have your payment info on record if possible. That being said, saving payment info on your account is more problematic than saving your address, as it seems to require purchasing something via Playstation Direct.
+
+## Related repos
+* camtheperson's [get-my-ps5](https://github.com/camtheperson/get-my-ps5) is a much simpler way to do the same task, simply accessing the site without cookies and a cache until a redirect to the queue is found. I had assumed based on a little manual testing that this would result in being bombarded with captcha, but I stand corrected. Using their's would also be perfectly fine and would almost certainly guarantee you enter the queue on time.
 
 ## Notes
 * Has only been tested on Windows 10.
