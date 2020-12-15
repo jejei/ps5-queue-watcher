@@ -1,6 +1,7 @@
 {
   "name": "ps5-queue-watcher",
   "version": "1.0.0",
+  "repository": "https://github.com/jejei/ps5-queue-watcher",
   "description": "PS Direct queue monitor for PS5",
   "main": "main.js",
   "scripts": {
