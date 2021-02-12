@@ -11,7 +11,7 @@
   "author": "Jakob",
   "license": "MIT",
   "dependencies": {
-    "electron": "^11.0.3",
+    "electron": "^11.1.0",
     "electron-fetch": "^1.7.2",
     "node-notifier": "^8.0.1",
     "pino": "^6.7.0",
